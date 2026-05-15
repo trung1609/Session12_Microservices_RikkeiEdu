@@ -1,0 +1,28 @@
+server:
+    port: 8081
+spring:
+    application:
+        name: customer-service
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        password: 123456
+        url: jdbc:postgresql://localhost:5432/customer_service_session03
+        username: postgres
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                dialect: org.hibernate.dialect.PostgreSQLDialect
+        show-sql: true
+
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8761/eureka/
+        register-with-eureka: true
+        fetch-registry: true
+
+    instance:
+        lease-renewal-interval-in-seconds: 5
+        lease-expiration-duration-in-seconds: 10
