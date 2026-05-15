@@ -4,6 +4,7 @@ import com.trung.orderservice.dto.OrderCreateRequest;
 import com.trung.orderservice.dto.OrderResponse;
 import com.trung.orderservice.dto.ProductResponseDTO;
 import com.trung.orderservice.entity.Orders;
+import com.trung.orderservice.event.OrderCreateEvent;
 import com.trung.orderservice.exception.InvalidDataException;
 import com.trung.orderservice.exception.ResourceNotFoundException;
 import com.trung.orderservice.exception.ServerErrorException;
@@ -13,11 +14,13 @@ import com.trung.orderservice.service.OrderService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -27,27 +30,39 @@ public class OrderServiceImpl implements OrderService {
     private final DiscoveryClient discoveryClient;
     private final RestTemplate restTemplate;
     private final CustomerClient customerClient;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @Override
     @Transactional
     public OrderResponse createOrder(OrderCreateRequest request) throws InvalidDataException, ServerErrorException, ResourceNotFoundException {
-            ProductResponseDTO product = productClient.getProductById(request.getProductId());
-            if (customerClient.getCustomerById(request.getCustomerId()).getBody() == null) {
-                throw new ResourceNotFoundException("Customer not found with id: " + request.getCustomerId());
-            }
-            if (product.getStockQuantity() < request.getQuantity()) {
-                throw new InvalidDataException("Insufficient stock for product id: " + request.getProductId());
-            }
+        ProductResponseDTO product = productClient.getProductById(request.getProductId());
+        if (customerClient.getCustomerById(request.getCustomerId()).getBody() == null) {
+            throw new ResourceNotFoundException("Customer not found with id: " + request.getCustomerId());
+        }
+        if (product.getStockQuantity() < request.getQuantity()) {
+            throw new InvalidDataException("Insufficient stock for product id: " + request.getProductId());
+        }
 
-            productClient.reduceStock(request.getProductId(), request.getQuantity());
+//        productClient.reduceStock(request.getProductId(), request.getQuantity());
 
-            Orders orders = new Orders();
-            orders.setCustomerId(request.getCustomerId());
-            orders.setProductId(request.getProductId());
-            orders.setTotalAmount(product.getPrice() * request.getQuantity());
+        Orders orders = new Orders();
+        orders.setCustomerId(request.getCustomerId());
+        orders.setProductId(request.getProductId());
+        orders.setTotalAmount(product.getPrice() * request.getQuantity());
 
-            orderRepository.save(orders);
-            return OrderMapper.toDTO(orders);
+        orderRepository.save(orders);
+
+        OrderCreateEvent event = OrderCreateEvent.builder()
+                .orderId(orders.getId())
+                .productId(request.getProductId())
+                .customerId(request.getCustomerId())
+                .totalAmount(orders.getTotalAmount())
+                .quantity(request.getQuantity())
+                .userEmail(customerClient.getCustomerById(request.getCustomerId()).getBody().getEmail())
+                .build();
+        kafkaTemplate.send("order-events", event);
+
+        return OrderMapper.toDTO(orders);
     }
 
     @Override

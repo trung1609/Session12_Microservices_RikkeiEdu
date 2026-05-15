@@ -2,6 +2,7 @@ package com.trung.productservice.controller;
 
 import com.trung.productservice.dto.ProductRequestDTO;
 import com.trung.productservice.dto.ProductResponseDTO;
+import com.trung.productservice.event.OrderCreateEvent;
 import com.trung.productservice.exception.ResourceNotFoundException;
 import com.trung.productservice.service.ProductService;
 import jakarta.validation.Valid;
@@ -34,9 +35,8 @@ public class ProductController {
     }
 
     @PutMapping("/reduce-stock")
-    public ResponseEntity<?> reduceStock(@RequestParam Long productId,
-                                         @RequestParam Integer quantity) throws ResourceNotFoundException {
-        productService.reduceStock(productId, quantity);
+    public ResponseEntity<?> reduceStock(@RequestBody OrderCreateEvent event) throws ResourceNotFoundException {
+        productService.reduceStock(event);
         return new ResponseEntity<>(HttpStatus.OK);
     }
 

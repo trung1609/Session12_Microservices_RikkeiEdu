@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="CopilotDiffPersistence">
+    <option name="pendingDiffs">
+      <map>
+        <entry key="$PROJECT_DIR$/product-service/src/main/java/com/trung/productservice/event/OrderCreateEvent.java">
+          <value>
+            <PendingDiffInfo>
+              <option name="filePath" value="$PROJECT_DIR$/product-service/src/main/java/com/trung/productservice/event/OrderCreateEvent.java" />
+              <option name="originalContent" value="package com.trung.productservice.event;&#10;&#10;import lombok.AllArgsConstructor;&#10;import lombok.Builder;&#10;import lombok.Data;&#10;import lombok.NoArgsConstructor;&#10;&#10;@AllArgsConstructor&#10;@NoArgsConstructor&#10;@Data&#10;@Builder&#10;public class OrderCreateEvent {&#10;    private Long orderId;&#10;    private Long productId;&#10;    private Long customerId;&#10;    private Double totalAmount;&#10;    private Integer quantity;&#10;    private String userEmail;&#10;}&#10;" />
+              <option name="updatedContent" value="package com.trung.productservice.event;&#10;&#10;import lombok.AllArgsConstructor;&#10;import lombok.Builder;&#10;import lombok.Data;&#10;import lombok.NoArgsConstructor;&#10;&#10;@AllArgsConstructor&#10;@NoArgsConstructor&#10;@Data&#10;@Builder&#10;public class OrderCreateEvent {&#10;    private Long orderId;&#10;    private Long productId;&#10;    private Long customerId;&#10;    private Double totalAmount;&#10;    private int quantity;&#10;    private String userEmail;&#10;}&#10;" />
+            </PendingDiffInfo>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>

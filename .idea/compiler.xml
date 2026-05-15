@@ -20,6 +20,9 @@
       <module name="discovery-server" options="-parameters" />
       <module name="discovery-server.main" options="-parameters" />
       <module name="discovery-server.test" options="-parameters" />
+      <module name="email-service" options="-parameters" />
+      <module name="email-service.main" options="-parameters" />
+      <module name="email-service.test" options="-parameters" />
       <module name="gateway-service" options="-parameters" />
       <module name="gateway-service.main" options="-parameters" />
       <module name="gateway-service.test" options="-parameters" />
