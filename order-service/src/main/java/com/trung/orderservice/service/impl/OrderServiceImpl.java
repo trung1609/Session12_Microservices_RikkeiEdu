@@ -42,6 +42,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Transactional
+
     public OrderResponse createOrder(OrderCreateRequest request) throws InvalidDataException, ServerErrorException, ResourceNotFoundException {
         if (customerClient.getCustomerById(request.getCustomerId()).getBody() == null) {
             throw new ResourceNotFoundException("Customer not found with id: " + request.getCustomerId());

@@ -41,6 +41,8 @@ dependencies {
     testAnnotationProcessor 'org.projectlombok:lombok'
     // Source: https://mvnrepository.com/artifact/org.redisson/redisson
     implementation("org.redisson:redisson:4.4.0")
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
 }
 dependencyManagement {
     imports {
