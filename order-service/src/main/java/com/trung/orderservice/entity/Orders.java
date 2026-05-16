@@ -1,10 +1,7 @@
 package com.trung.orderservice.entity;
 
 import com.trung.orderservice.constant.OrderStatus;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -29,6 +26,9 @@ public class Orders {
 
     @CreationTimestamp
     private LocalDateTime orderDate;
+
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     private Double totalAmount;
 }

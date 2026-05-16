@@ -1,0 +1,34 @@
+server:
+    port: 8085
+spring:
+    application:
+        name: shipping-service
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        password: 123456
+        url: jdbc:mysql://localhost:3306/shipping_service?createDatabaseIfNotExist=true
+        username: root
+    jpa:
+        hibernate:
+            ddl-auto: update
+        properties:
+            hibernate:
+                format_sql: true
+        show-sql: true
+
+    kafka:
+      bootstrap-servers: localhost:9092
+      producer:
+          acks: all
+          retries: 3
+          key-serializer: org.apache.kafka.common.serialization.StringSerializer
+          value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+          properties:
+            spring.json.trusted.packages: "*"
+            spring.json.type.mapping: shipping_event:com.trung.shippingservice.event.ShippingStatusEvent
+eureka:
+    client:
+        serviceUrl:
+            defaultZone: http://localhost:8761/eureka/
+        fetch-registry: true
+        register-with-eureka: true

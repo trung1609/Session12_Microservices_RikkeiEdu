@@ -1,11 +1,13 @@
 package com.trung.orderservice.service.impl;
 
 import com.trung.orderservice.config.RedissonConfig;
+import com.trung.orderservice.constant.OrderStatus;
 import com.trung.orderservice.dto.OrderCreateRequest;
 import com.trung.orderservice.dto.OrderResponse;
 import com.trung.orderservice.dto.ProductResponseDTO;
 import com.trung.orderservice.entity.Orders;
 import com.trung.orderservice.event.OrderCreateEvent;
+import com.trung.orderservice.event.ShippingStatusEvent;
 import com.trung.orderservice.exception.InvalidDataException;
 import com.trung.orderservice.exception.ResourceNotFoundException;
 import com.trung.orderservice.exception.ServerErrorException;
@@ -17,6 +19,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
 import org.springframework.cloud.client.ServiceInstance;
 import org.springframework.cloud.client.discovery.DiscoveryClient;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,6 +70,7 @@ public class OrderServiceImpl implements OrderService {
             orders.setCustomerId(request.getCustomerId());
             orders.setProductId(request.getProductId());
             orders.setTotalAmount(product.getPrice() * request.getQuantity());
+            orders.setStatus(OrderStatus.PENDING);
 
             orderRepository.save(orders);
 
@@ -112,4 +116,21 @@ public class OrderServiceImpl implements OrderService {
         String targetUrl = "http://PRODUCT-SERVICE/api/v1/products/" + productId;
         return restTemplate.getForObject(targetUrl, ProductResponseDTO.class);
     }
+
+    @Override
+    @Transactional
+    @KafkaListener(topics = "shipping-events", groupId = "order-service-group")
+    public void handleShippingEvent(ShippingStatusEvent event) {
+        log.info("Received shipping status event: {}", event);
+
+        if ("DELIVERED".equals(event.getStatus())) {
+            orderRepository.findById(event.getOrderId()).ifPresent(order -> {
+                order.setStatus(OrderStatus.COMPLETED);
+                orderRepository.save(order);
+                log.info("Updated order status to COMPLETED for orderId: {}", event.getOrderId());
+            });
+        }
+    }
+
+
 }
