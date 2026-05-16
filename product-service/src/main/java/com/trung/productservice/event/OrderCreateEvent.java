@@ -14,6 +14,6 @@ public class OrderCreateEvent {
     private Long productId;
     private Long customerId;
     private Double totalAmount;
-    private int quantity;
+    private Integer quantity;
     private String userEmail;
 }

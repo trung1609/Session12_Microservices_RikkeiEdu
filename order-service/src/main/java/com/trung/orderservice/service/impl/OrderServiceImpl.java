@@ -1,6 +1,5 @@
 package com.trung.orderservice.service.impl;
 
-import com.trung.orderservice.config.RedisConfig;
 import com.trung.orderservice.config.RedissonConfig;
 import com.trung.orderservice.dto.OrderCreateRequest;
 import com.trung.orderservice.dto.OrderResponse;
@@ -24,7 +23,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 @Service

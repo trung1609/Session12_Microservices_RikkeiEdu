@@ -49,7 +49,6 @@ public class OrderController {
         });
         thread1.start();
         thread2.start();
-
         return new ResponseEntity<>(orderService.createOrder(request), HttpStatus.CREATED);
     }
 

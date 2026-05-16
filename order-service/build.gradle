@@ -28,7 +28,10 @@ dependencies {
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
     implementation 'org.springframework.boot:spring-boot-starter-kafka'
+<<<<<<< HEAD
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+=======
+>>>>>>> 2ac642edcd80044289f446e3b41a7980a3f3d4b7
     testImplementation 'org.springframework.kafka:spring-kafka-test'
     compileOnly 'org.projectlombok:lombok'
     runtimeOnly 'org.postgresql:postgresql'
@@ -39,8 +42,11 @@ dependencies {
     testCompileOnly 'org.projectlombok:lombok'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
     testAnnotationProcessor 'org.projectlombok:lombok'
+<<<<<<< HEAD
     // Source: https://mvnrepository.com/artifact/org.redisson/redisson
     implementation("org.redisson:redisson:4.4.0")
+=======
+>>>>>>> 2ac642edcd80044289f446e3b41a7980a3f3d4b7
 }
 dependencyManagement {
     imports {
