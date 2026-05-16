@@ -1,0 +1,29 @@
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    gateway:
+      routes:
+        - id: customer-service
+          uri: lb://customer-service
+          predicates:
+            - Path=/api/v1/customers/**
+          filters:
+            - AddRequestHeader=X-Request-Source, Gateway
+            - AddResponseHeader=X-System-Name, Api-Gateway-Service
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/v1/order-api/**
+          filters:
+            - RewritePath=/v1/order-api/(?<segment>.*), /api/v1/orders/${segment}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+    register-with-eureka: true
+    fetch-registry: true
+server:
+  port: 8888
