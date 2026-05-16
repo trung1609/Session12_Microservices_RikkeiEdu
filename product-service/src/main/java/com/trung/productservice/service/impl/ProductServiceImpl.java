@@ -13,16 +13,20 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
     private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
     private final ProductRepository productRepository;
+    private final RedisTemplate<String, ProductResponseDTO> redisTemplate;
+    private final PromotionClient promotionClient;
 
     @Override
     public ProductResponseDTO createProduct(ProductRequestDTO requestDTO) {
@@ -35,9 +39,33 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Cacheable(value = "products", key = "#id")
     public ProductResponseDTO getProductById(Long id) throws ResourceNotFoundException {
-        return productRepository.findById(id)
-                .map(ProductMapper::toDTO)
-                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id: " + id));
+        String cacheKey = "products::" + id;
+
+        ProductResponseDTO cachedProduct = (ProductResponseDTO) redisTemplate.opsForValue().get(cacheKey);
+        if (cachedProduct != null) {
+            log.info("Cache Hit! Lấy dữ liệu từ Redis cho sản phẩm ID: {}", id);
+            return cachedProduct;
+        }
+        log.info("Cache Miss! Truy vấn Database cho sản phẩm ID: {}", id);
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy sản phẩm với ID: " + id));
+
+        ProductResponseDTO responseDTO = ProductMapper.toDTO(product);
+
+        try {
+            Double discountedPrice = promotionClient.getDiscountedPrice(id);
+            if (discountedPrice != null) {
+                product.setPrice(discountedPrice);
+                productRepository.save(product);
+                responseDTO.setPrice(discountedPrice);
+            }
+        } catch (Exception e) {
+            log.error("Lỗi khi gọi Promotion-Service cho sản phẩm {}. Tạm thời sử dụng giá gốc.", id);
+        }
+
+        redisTemplate.opsForValue().set(cacheKey, responseDTO, 30, TimeUnit.MINUTES);
+        log.info("Đã nạp dữ liệu mới vào Cache cho sản phẩm ID: {}", id);
+        return responseDTO;
     }
 
     @Override
